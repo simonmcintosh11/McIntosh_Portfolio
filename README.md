@@ -15,6 +15,12 @@ All content lives in **`content.js`**. Open it and replace the placeholder text 
 
 Any list left empty (`[]`) hides its section automatically.
 
+### Featured research visuals
+
+The `featured` block in `content.js` shows a research project with interactive visuals, each paired with a paragraph.
+Each visual is a standalone HTML page in `research/capstone/`. To add one, put the page in that folder and add an entry to `featured.visuals` with a `title`, `src`, and `paragraph`.
+Embedded visuals resize to fit only when the site is served over http (GitHub Pages or `python3 -m http.server`), not when `index.html` is opened directly from disk.
+
 ### Photo and CV
 
 Put files in the `assets/` folder and reference them in `content.js`:

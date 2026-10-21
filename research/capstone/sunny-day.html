@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sunny Day Balcony Solar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@600;700&family=Public+Sans:wght@400;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* One column: headline, controls + before/after bars, 24-hour load chart, assumptions */
+:root{
+  --bg:#f3f4f2; --surface:#ffffff; --fg:#1d2326; --muted:#5d686d; --line:#d5dad8;
+  --sun:#d98a00; --sun-ink:#8a5800; --sun-soft:#f7e3bd; --grid:#4d6b7c; --grid-soft:#c9d6dd; --peak:#efe9f3;
+  --f-display:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13181a; --surface:#1b2225; --fg:#e7ebea; --muted:#9aa5a9; --line:#2e383c;
+  --sun:#f0a623; --sun-ink:#f5c26b; --sun-soft:#4a3a17; --grid:#86a8bb; --grid-soft:#2d3e48; --peak:#221f29; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13181a; --surface:#1b2225; --fg:#e7ebea; --muted:#9aa5a9; --line:#2e383c;
+  --sun:#f0a623; --sun-ink:#f5c26b; --sun-soft:#4a3a17; --grid:#86a8bb; --grid-soft:#2d3e48; --peak:#221f29; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+.wrap{max-width:980px;margin:0 auto;padding-inline:20px;padding-block:28px 52px;display:grid;gap:22px}
+.eyebrow{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.1;margin:4px 0 8px;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.05rem;margin:0 0 10px}
+.lede{color:var(--muted);max-width:66ch;margin:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:22px}
+@media (max-width:760px){.top{grid-template-columns:1fr}}
+.ctl{display:grid;gap:16px}
+label,.lbl{font-weight:600;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+label output{font-family:var(--f-mono);color:var(--sun-ink)}
+input[type=range]{width:100%;accent-color:var(--sun);margin:8px 0 0}
+input[type=range]:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.seg button{font:inherit;font-size:.84rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:6px 10px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--sun);background:var(--sun-soft);color:var(--fg);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--sun);outline-offset:1px}
+.big{font-family:var(--f-mono);font-weight:700;font-size:clamp(2.2rem,6vw,3.2rem);line-height:1;color:var(--sun-ink)}
+.bigcap{color:var(--muted);font-size:.9rem;margin-top:6px}
+.bars{display:grid;gap:10px;margin-top:18px}
+.brow{display:grid;grid-template-columns:96px minmax(0,1fr) 78px;gap:10px;align-items:center;font-size:.84rem}
+.brow .n{color:var(--muted)}
+.brow .v{font-family:var(--f-mono);text-align:right}
+.track{height:26px;border-radius:4px;background:var(--bg);overflow:hidden;display:flex}
+.track span{height:100%;transition:width .2s}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--surface);padding:14px 14px}
+.stat .k{font-size:.78rem;color:var(--muted)}
+.stat .v{font-family:var(--f-mono);font-weight:700;font-size:1.35rem;margin-top:2px}
+.stat .s{font-size:.75rem;color:var(--muted)}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.82rem;color:var(--muted);margin-bottom:8px}
+.key i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.chartbox{overflow-x:auto}
+#chart{display:block;touch-action:none}
+svg text{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+.read{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);min-height:1.5em;margin-top:6px}
+.read b{color:var(--fg);font-weight:500}
+ul{margin:0;padding-left:18px;display:grid;gap:8px;color:var(--muted);font-size:.88rem;max-width:72ch}
+ul strong{color:var(--fg)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Illustrative sunny summer day, sample household data</div>
+    <h1 id="headline">One balcony panel, one household, one sunny day</h1>
+    <p class="lede">A made-up but typical PG&amp;E home on a clear July day. The panel only helps while the sun is up and someone is using power, so most of its value lands midday, before the expensive 4 to 9 p.m. window.</p>
+  </header>
+
+  <section class="top">
+    <div class="panel ctl" aria-label="Assumptions">
+      <div>
+        <label for="watts">Panel size <output id="wattsOut">800 W</output></label>
+        <input type="range" id="watts" min="300" max="1200" step="100" value="800">
+      </div>
+      <div>
+        <span class="lbl">Who's home</span>
+        <div class="seg" id="who">
+          <button type="button" data-v="away" aria-pressed="true">Out during the day</button>
+          <button type="button" data-v="home" aria-pressed="false">Home all day</button>
+        </div>
+      </div>
+      <div>
+        <span class="lbl">Balcony faces</span>
+        <div class="seg" id="face">
+          <button type="button" data-v="1" aria-pressed="true">South, no shade</button>
+          <button type="button" data-v="0.72" aria-pressed="false">East or west</button>
+          <button type="button" data-v="0.5" aria-pressed="false">Partly shaded</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="big" id="cutPct">0%</div>
+      <div class="bigcap" id="cutCap">less electricity bought from PG&amp;E today</div>
+      <div class="bars" aria-hidden="true">
+        <div class="brow"><span class="n">Without solar</span><div class="track"><span id="barA" style="background:var(--grid)"></span></div><span class="v" id="valA"></span></div>
+        <div class="brow"><span class="n">With solar</span><div class="track"><span id="barB" style="background:var(--grid)"></span><span id="barC" style="background:var(--sun)"></span></div><span class="v" id="valB"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" aria-live="polite">
+    <div class="stat"><div class="k">Household use</div><div class="v" id="sUse"></div><div class="s">kWh over 24 hours</div></div>
+    <div class="stat"><div class="k">Panel produced</div><div class="v" id="sGen"></div><div class="s" id="sGenS">kWh</div></div>
+    <div class="stat"><div class="k">Sent to the grid unused</div><div class="v" id="sSpill"></div><div class="s">kWh, earns no credit</div></div>
+    <div class="stat"><div class="k">Saved on today's bill</div><div class="v" id="sSave"></div><div class="s" id="sSaveS"></div></div>
+  </section>
+
+  <section class="panel">
+    <h2>The day, hour by hour</h2>
+    <div class="key">
+      <span><i style="background:var(--sun)"></i>Covered by the panel</span>
+      <span><i style="background:var(--grid-soft);border:1px solid var(--grid)"></i>Bought from PG&amp;E</span>
+      <span><i style="background:var(--sun-soft);border:1px dashed var(--sun)"></i>Spilled to grid</span>
+      <span><i style="background:var(--peak)"></i>Peak price, 4 to 9 p.m.</span>
+    </div>
+    <div class="chartbox"><svg id="chart" viewBox="0 0 900 380" width="100%" role="img" aria-label="Area chart of household power use across 24 hours with the share covered by balcony solar highlighted."></svg></div>
+    <div class="read" id="read">Move across the chart to read any moment of the day.</div>
+  </section>
+
+  <section class="panel">
+    <h2>How the sample day is built</h2>
+    <ul>
+      <li><strong>Household load is invented.</strong> It follows a common California shape: a low overnight base (fridge, router, standby), a morning bump, a quiet middle and an evening peak from cooking, AC and TV. "Out during the day" totals about 16 kWh, close to the average PG&amp;E home's 500 kWh a month. "Home all day" adds about 3 kWh of midday use.</li>
+      <li><strong>Solar follows a clear July sky in San Jose.</strong> Output runs roughly 6:30 a.m. to 7:30 p.m. and peaks near 1 p.m. A balcony panel is rarely ideally tilted, so peak output is set at about 62% of the panel's rating before orientation and shade.</li>
+      <li><strong>Prices are PG&amp;E E-TOU-C summer rates</strong> from your 2026 bills: 52.24¢ per kWh from 4 to 9 p.m. and 39.94¢ at all other hours. Baseline credits and the daily base charge are left out, since solar doesn't change them.</li>
+      <li><strong>Spilled power earns nothing.</strong> Plug-in systems aren't enrolled in net billing, so anything the home can't use at that moment flows to the grid uncredited. This is a sunny summer day, so a year-round average would be lower.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+(function(){
+  // Hourly average load in kW, hour 0 = midnight to 1 a.m.
+  var LOAD={
+    away:[0.35,0.30,0.30,0.30,0.30,0.35,0.55,0.85,0.70,0.50,0.45,0.45,0.50,0.45,0.45,0.50,0.75,1.10,1.40,1.50,1.35,1.10,0.80,0.50],
+    home:[0.35,0.30,0.30,0.30,0.30,0.35,0.55,0.85,0.80,0.75,0.80,0.85,0.95,0.90,0.85,0.85,0.95,1.15,1.40,1.50,1.35,1.10,0.80,0.50]
+  };
+  var DERATE=0.62, RISE=6.5, SET=19.5, PEAK=0.5224, OFF=0.3994;
+  var STEP=1/12, N=24*12; // five-minute steps
+  var st={w:800, who:"away", face:1};
+  var $=function(id){return document.getElementById(id)};
+
+  function loadAt(t,prof){ // linear between hour midpoints, wrapping at midnight
+    var a=LOAD[prof], u=t-0.5, i=Math.floor(u), f=u-i;
+    var p=a[(i+24)%24], q=a[(i+25)%24];
+    return p+(q-p)*f;
+  }
+  function solarAt(t){
+    if(t<=RISE||t>=SET) return 0;
+    return st.w/1000*DERATE*st.face*Math.pow(Math.sin(Math.PI*(t-RISE)/(SET-RISE)),1.5);
+  }
+  function rateAt(t){return (t>=16&&t<21)?PEAK:OFF}
+  function fmtT(t){var h=Math.floor(t)%24,m=Math.round((t-Math.floor(t))*60);if(m===60){h=(h+1)%24;m=0}
+    var ap=h<12?"a.m.":"p.m.",hh=h%12===0?12:h%12;return hh+":"+(m<10?"0":"")+m+" "+ap}
+
+  var pts=[];
+  function compute(){
+    pts=[]; var T={use:0,gen:0,self:0,spill:0,save:0,cost:0};
+    for(var i=0;i<=N;i++){
+      var t=i*STEP, L=loadAt(t,st.who), S=solarAt(t), U=Math.min(L,S);
+      pts.push({t:t,L:L,S:S,U:U});
+      if(i<N){var tm=t+STEP/2, l=loadAt(tm,st.who), s=solarAt(tm), u=Math.min(l,s);
+        T.use+=l*STEP; T.gen+=s*STEP; T.self+=u*STEP; T.spill+=(s-u)*STEP; T.save+=u*STEP*rateAt(tm); T.cost+=l*STEP*rateAt(tm);}
+    }
+    return T;
+  }
+
+  var W=900,H=380,Lm=52,Rm=18,Tm=26,Bm=42,PW=W-Lm-Rm,PH=H-Tm-Bm,YMAX=1.6;
+  var X=function(t){return Lm+t/24*PW}, Y=function(v){return Tm+(1-v/YMAX)*PH};
+  function poly(top,bot){
+    var a=pts.map(function(p){return X(p.t)+","+Y(top(p))});
+    var b=pts.slice().reverse().map(function(p){return X(p.t)+","+Y(bot(p))});
+    return a.concat(b).join(" ");
+  }
+  var cursor=null;
+  function draw(){
+    var h='<defs><pattern id="spill" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="var(--sun-soft)"/><line x1="0" y1="0" x2="0" y2="7" stroke="var(--sun)" stroke-width="1.6"/></pattern></defs>';
+    h+='<rect x="'+X(16)+'" y="'+Tm+'" width="'+(X(21)-X(16))+'" height="'+PH+'" fill="var(--peak)"/>';
+    h+='<text x="'+((X(16)+X(21))/2)+'" y="'+(Tm-8)+'" text-anchor="middle">peak price</text>';
+    for(var v=0;v<=YMAX+1e-9;v+=0.4){h+='<line x1="'+Lm+'" x2="'+(Lm+PW)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line)"/><text x="'+(Lm-8)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v.toFixed(1)+'</text>'}
+    h+='<text x="'+(Lm-8)+'" y="'+(Tm-8)+'" text-anchor="end">kW</text>';
+    [0,3,6,9,12,15,18,21,24].forEach(function(t){var lab=t===0||t===24?"12a":t===12?"12p":(t<12?t+"a":(t-12)+"p");h+='<text x="'+X(t)+'" y="'+(H-Bm+20)+'" text-anchor="middle">'+lab+'</text>'});
+    // bought from grid: between self-use and load
+    h+='<polygon points="'+poly(function(p){return p.L},function(p){return p.U})+'" fill="var(--grid-soft)"/>';
+    // covered by panel
+    h+='<polygon points="'+poly(function(p){return p.U},function(){return 0})+'" fill="var(--sun)"/>';
+    // spill above load
+    h+='<polygon points="'+poly(function(p){return Math.max(p.S,p.L)},function(p){return p.L})+'" fill="url(#spill)"/>';
+    h+='<polyline fill="none" stroke="var(--grid)" stroke-width="2.25" points="'+pts.map(function(p){return X(p.t)+","+Y(p.L)}).join(" ")+'"/>';
+    h+='<polyline fill="none" stroke="var(--sun-ink)" stroke-width="1.5" stroke-dasharray="5 4" points="'+pts.filter(function(p){return p.S>0||Math.abs(p.t-RISE)<0.1||Math.abs(p.t-SET)<0.1}).map(function(p){return X(p.t)+","+Y(p.S)}).join(" ")+'"/>';
+    h+='<line x1="'+Lm+'" x2="'+(Lm+PW)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="var(--muted)"/>';
+    if(cursor!==null){var p=pts[Math.round(cursor/STEP)];
+      h+='<line x1="'+X(p.t)+'" x2="'+X(p.t)+'" y1="'+Tm+'" y2="'+Y(0)+'" stroke="var(--fg)" stroke-opacity=".5" stroke-dasharray="3 3"/>';
+      h+='<circle cx="'+X(p.t)+'" cy="'+Y(p.L)+'" r="4.5" fill="var(--grid)" stroke="var(--surface)" stroke-width="2"/>';
+      if(p.S>0) h+='<circle cx="'+X(p.t)+'" cy="'+Y(p.S)+'" r="4.5" fill="var(--sun)" stroke="var(--surface)" stroke-width="2"/>';
+    }
+    $("chart").innerHTML=h;
+  }
+  function readout(){
+    if(cursor===null) return;
+    var p=pts[Math.round(cursor/STEP)];
+    $("read").innerHTML='<b>'+fmtT(p.t)+'</b> · using <b>'+p.L.toFixed(2)+' kW</b> · panel <b>'+p.S.toFixed(2)+' kW</b> · from PG&amp;E <b>'+(p.L-p.U).toFixed(2)+' kW</b>'+(p.S>p.L?' · spilling <b>'+(p.S-p.L).toFixed(2)+' kW</b>':'')+' · '+(rateAt(p.t)===PEAK?'peak':'off-peak')+' '+(rateAt(p.t)*100).toFixed(2)+'¢';
+  }
+  function update(){
+    $("wattsOut").textContent=st.w+" W";
+    var T=compute(), bought=T.use-T.self, pct=T.self/T.use*100;
+    $("cutPct").textContent="−"+pct.toFixed(1)+"%";
+    $("cutCap").textContent="less electricity bought from PG&E today: "+T.self.toFixed(1)+" of "+T.use.toFixed(1)+" kWh came from the panel";
+    $("headline").textContent=st.w+" W of balcony solar cuts this home's grid use by "+pct.toFixed(0)+"% on a sunny day";
+    var max=T.use;
+    $("barA").style.width="100%"; $("valA").textContent=T.use.toFixed(1)+" kWh";
+    $("barB").style.width=(bought/max*100)+"%"; $("barC").style.width=(T.self/max*100)+"%";
+    $("valB").textContent=bought.toFixed(1)+" kWh";
+    $("sUse").textContent=T.use.toFixed(1);
+    $("sGen").textContent=T.gen.toFixed(1);
+    $("sGenS").textContent="kWh, "+(T.self/T.gen*100).toFixed(0)+"% used in the home";
+    $("sSpill").textContent=T.spill.toFixed(1);
+    $("sSave").textContent="$"+T.save.toFixed(2);
+    $("sSaveS").textContent="of $"+T.cost.toFixed(2)+" in energy charges";
+    draw(); readout();
+  }
+  $("watts").addEventListener("input",function(e){st.w=+e.target.value;update()});
+  function seg(id,key,num){
+    $(id).addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+      st[key]=num?+b.dataset.v:b.dataset.v;
+      $(id).querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")});
+      update();});
+  }
+  seg("who","who",false); seg("face","face",true);
+  var svg=$("chart");
+  function move(e){
+    var pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+    var p=pt.matrixTransform(svg.getScreenCTM().inverse());
+    var t=(p.x-Lm)/PW*24; t=Math.max(0,Math.min(24,t)); cursor=Math.round(t/STEP)*STEP; draw(); readout();
+  }
+  svg.addEventListener("pointermove",move);
+  svg.addEventListener("pointerdown",move);
+  cursor=13; update();
+})();
+</script>
+</body>
+</html>

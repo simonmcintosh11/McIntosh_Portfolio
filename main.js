@@ -55,6 +55,51 @@
     )
     .join("");
 
+  // ---------- Featured research ----------
+  const F = S.featured;
+  if (!F) {
+    $("featured").hidden = true;
+    $("more-research").hidden = true;
+  } else {
+    if (!(S.research || []).length) $("more-research").hidden = true;
+    $("featured").innerHTML = `
+      <div class="card-head">
+        <h3 class="featured-title">${esc(F.title)}</h3>
+        ${F.period ? `<span class="muted small">${esc(F.period)}</span>` : ""}
+      </div>
+      ${(F.intro || []).map((p) => `<p>${esc(p)}</p>`).join("")}
+      ${F.tags && F.tags.length ? `<ul class="chips small">${F.tags.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
+      ${(F.visuals || [])
+        .map(
+          (v, i) => `
+        <figure class="visual">
+          <figcaption>
+            <div class="visual-head">
+              <h4><span class="muted">Figure ${i + 1}.</span> ${esc(v.title)}</h4>
+              <a class="pill-link" href="${esc(v.src)}" target="_blank" rel="noopener">Open full screen</a>
+            </div>
+            <p>${esc(v.paragraph)}</p>
+          </figcaption>
+          <div class="visual-frame"><iframe src="${esc(v.src)}" title="${esc(v.title)}" loading="lazy"></iframe></div>
+        </figure>`
+        )
+        .join("")}`;
+  }
+
+  // Embedded visuals: match the site theme and grow to fit their content
+  const syncFrame = (f) => {
+    try {
+      const doc = f.contentDocument;
+      const t = document.documentElement.dataset.theme;
+      if (t) doc.documentElement.dataset.theme = t;
+      else delete doc.documentElement.dataset.theme;
+      const fit = () => (f.style.height = doc.documentElement.scrollHeight + "px");
+      fit();
+      if (!f._ro) (f._ro = new ResizeObserver(fit)).observe(doc.body);
+    } catch (_) {} // cross-origin (e.g. opened from disk): keep the CSS fallback height
+  };
+  document.querySelectorAll(".visual-frame iframe").forEach((f) => f.addEventListener("load", () => syncFrame(f)));
+
   // ---------- Publications ----------
   const pubs = (S.publications || []).slice().sort((a, b) => (b.year || 0) - (a.year || 0));
 
@@ -194,6 +239,7 @@
   $("theme-toggle").addEventListener("click", () => {
     const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
     root.dataset.theme = dark ? "light" : "dark";
+    document.querySelectorAll(".visual-frame iframe").forEach(syncFrame);
     try {
       localStorage.setItem("theme", root.dataset.theme);
     } catch (_) {}

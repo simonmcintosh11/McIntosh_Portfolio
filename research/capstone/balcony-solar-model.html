@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balcony solar on PG&amp;E's residential system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16202F;
+  --ink-soft:#5A6675;
+  --paper:#F1F3EF;
+  --panel:#FFFFFF;
+  --line:#D3D8D2;
+  --line-strong:#AAB2AA;
+  --pv:#2D6FD4;
+  --sun:#D9A327;
+  --loss:#9C3B3B;
+  --rail:#E2E5E0;
+  --focus:#2D6FD4;
+  --shadow:none;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E8ECE7;
+    --ink-soft:#97A2AE;
+    --paper:#0F1520;
+    --panel:#161F2C;
+    --line:#2A3544;
+    --line-strong:#3D4B5C;
+    --pv:#6FA4F0;
+    --sun:#E8BC4E;
+    --loss:#D97A7A;
+    --rail:#222D3C;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E8ECE7;
+  --ink-soft:#97A2AE;
+  --paper:#0F1520;
+  --panel:#161F2C;
+  --line:#2A3544;
+  --line-strong:#3D4B5C;
+  --pv:#6FA4F0;
+  --sun:#E8BC4E;
+  --loss:#D97A7A;
+  --rail:#222D3C;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:40px 24px 72px}
+header{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:28px}
+h1{
+  font-size:clamp(28px,4.4vw,46px);
+  line-height:1.06;
+  font-weight:700;
+  letter-spacing:-0.022em;
+  margin:0 0 10px;
+  max-width:18ch;
+}
+.standfirst{margin:0;max-width:64ch;color:var(--ink-soft);font-size:15px}
+.layout{display:grid;grid-template-columns:330px 1fr;gap:28px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+
+/* controls */
+.controls{
+  background:var(--panel);
+  border:1px solid var(--line);
+  padding:20px;
+  position:sticky;top:20px;
+}
+@media (max-width:860px){.controls{position:static}}
+.controls h2{font-size:13px;font-weight:600;margin:0 0 18px;letter-spacing:.01em}
+.ctl{margin-bottom:22px}
+.ctl:last-of-type{margin-bottom:8px}
+.ctl-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:2px}
+.ctl-head label{font-size:13.5px;font-weight:500}
+.ctl-val{font-size:17px;font-weight:600;color:var(--pv);white-space:nowrap}
+.ctl-note{font-size:11.5px;color:var(--ink-soft);margin:0 0 9px;line-height:1.35}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:0;cursor:pointer;
+}
+input[type=range]:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--rail);border-radius:0}
+input[type=range]::-moz-range-track{height:3px;background:var(--rail)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;
+  background:var(--pv);border:2px solid var(--panel);margin-top:-6px;
+}
+input[type=range]::-moz-range-thumb{
+  width:15px;height:15px;border-radius:50%;background:var(--pv);border:2px solid var(--panel);
+}
+.reset{
+  margin-top:14px;width:100%;padding:9px;background:transparent;color:var(--ink-soft);
+  border:1px solid var(--line-strong);font:inherit;font-size:13px;cursor:pointer;
+}
+.reset:hover{color:var(--ink);border-color:var(--ink)}
+.reset:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* hero */
+.hero{background:var(--panel);border:1px solid var(--line);padding:24px;margin-bottom:22px}
+.hero-fig{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.hero-num{font-size:clamp(46px,8vw,74px);font-weight:700;line-height:.94;letter-spacing:-0.035em;color:var(--sun)}
+.hero-cap{font-size:15px;color:var(--ink-soft);max-width:34ch}
+.loadbar{margin-top:20px;height:34px;background:var(--rail);border:1px solid var(--line);display:flex;overflow:hidden}
+.loadbar span{background:var(--sun);transition:width .18s ease;min-width:0}
+.loadbar-key{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-top:7px}
+
+/* stat grid */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:22px}
+.stat{background:var(--panel);padding:16px 15px}
+.stat .k{font-size:12.5px;color:var(--ink-soft);margin:0 0 6px;line-height:1.3}
+.stat .v{font-size:25px;font-weight:600;letter-spacing:-0.02em;line-height:1.1}
+.stat .s{font-size:12px;color:var(--ink-soft);margin-top:4px}
+.v.loss{color:var(--loss)}
+.v.pv{color:var(--pv)}
+
+/* table */
+.tablecard{background:var(--panel);border:1px solid var(--line);padding:20px;margin-bottom:22px;overflow-x:auto}
+.tablecard h3{font-size:15px;font-weight:600;margin:0 0 4px}
+.tablecard p.sub{font-size:13px;color:var(--ink-soft);margin:0 0 16px;max-width:66ch}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:660px}
+th{
+  text-align:right;font-weight:600;font-size:12px;color:var(--ink-soft);
+  padding:0 0 8px 14px;border-bottom:1px solid var(--line-strong);
+}
+th:first-child{text-align:left;padding-left:0}
+td{padding:11px 0 11px 14px;text-align:right;border-bottom:1px solid var(--line)}
+td:first-child{text-align:left;padding-left:0;font-weight:500}
+tr:last-child td{border-bottom:none}
+tr.total td{border-top:2px solid var(--ink);border-bottom:none;font-weight:600;padding-top:12px}
+.sched-sub{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:400}
+.bar-cell{width:100%;max-width:120px}
+.minibar{height:8px;background:var(--rail);width:100%;display:block}
+.minibar i{display:block;height:100%;background:var(--loss)}
+
+/* notes */
+.notes{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--sun);padding:18px 20px}
+.notes h3{font-size:14px;font-weight:600;margin:0 0 10px}
+.notes ul{margin:0;padding-left:18px}
+.notes li{font-size:13.5px;margin-bottom:8px;color:var(--ink-soft);line-height:1.5}
+.notes li:last-child{margin-bottom:0}
+.notes strong{color:var(--ink);font-weight:600}
+footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-soft);max-width:78ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Balcony solar on PG&amp;E's residential system</h1>
+  <p class="standfirst">A plug-in panel hung off a railing generates a modest amount of power, but spread across millions of households it starts to move real volume. Set the assumptions on the left to see what it does to load and to utility revenue across PG&amp;E's four main residential rate schedules.</p>
+</header>
+
+<div class="layout">
+
+  <section class="controls">
+    <h2>Assumptions</h2>
+    <p class="ctl-note" style="margin-bottom:18px">Every kilowatt-hour produced is consumed in the home as it is generated. Nothing is exported, so all output offsets electricity at the full retail rate.</p>
+
+    <div class="ctl">
+      <div class="ctl-head"><label for="kwh">Daily output per install</label><span class="ctl-val" id="kwh-v">1.5 kWh</span></div>
+      <p class="ctl-note">Year-round daily average. A typical 800 W balcony kit in Northern California lands near 2 kWh; shaded or north-facing railings do far less.</p>
+      <input type="range" id="kwh" min="0.25" max="6" step="0.25" value="1.5">
+    </div>
+
+    <div class="ctl">
+      <div class="ctl-head"><label for="adopt">Household adoption</label><span class="ctl-val" id="adopt-v">5.0%</span></div>
+      <p class="ctl-note">Share of households on each schedule that install a unit.</p>
+      <input type="range" id="adopt" min="0" max="50" step="0.5" value="5">
+    </div>
+
+    <div class="ctl">
+      <div class="ctl-head"><label for="cost">Installed cost</label><span class="ctl-val" id="cost-v">$800</span></div>
+      <p class="ctl-note">All-in hardware and mounting per unit, used for the payback figure.</p>
+      <input type="range" id="cost" min="200" max="2500" step="50" value="800">
+    </div>
+
+    <button class="reset" id="reset">Reset assumptions</button>
+  </section>
+
+  <main>
+
+    <div class="hero">
+      <div class="hero-fig">
+        <div class="hero-num" id="offset">0.75%</div>
+        <p class="hero-cap">of residential electricity sales displaced across these four schedules</p>
+      </div>
+      <div class="loadbar"><span id="loadfill" style="width:0.75%"></span></div>
+      <div class="loadbar-key">
+        <span id="gen-label">0 GWh generated</span>
+        <span>27,471 GWh residential sales</span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <p class="k">Units installed</p>
+        <div class="v" id="installs">222,857</div>
+        <div class="s">across 4.46M households</div>
+      </div>
+      <div class="stat">
+        <p class="k">Annual generation</p>
+        <div class="v pv" id="gen">122 GWh</div>
+        <div class="s" id="gen-sub">548 kWh per unit</div>
+      </div>
+      <div class="stat">
+        <p class="k">Revenue not collected</p>
+        <div class="v loss" id="revloss">$34M</div>
+        <div class="s" id="revloss-sub">0.4% of $7.74B residential</div>
+      </div>
+      <div class="stat">
+        <p class="k">Typical payback</p>
+        <div class="v" id="payback">5.2 yrs</div>
+        <div class="s" id="payback-sub">at $154 saved per year</div>
+      </div>
+    </div>
+
+    <div class="tablecard">
+      <h3>Effect by rate schedule</h3>
+      <p class="sub">CARE customers pay a lower blended rate, so each displaced kilowatt-hour is worth less to them and costs PG&amp;E less in forgone revenue. The same panel pays back roughly twice as fast on a standard schedule as on a CARE one.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Schedule</th>
+            <th>Households</th>
+            <th>Units</th>
+            <th>Generation</th>
+            <th>Load offset</th>
+            <th>Saved per home</th>
+            <th>Payback</th>
+            <th>Revenue impact</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="notes">
+      <h3>What this model does not capture</h3>
+      <ul>
+        <li><strong>The fixed charge survives.</strong> Starting March 2026 most households pay a Base Services Charge of $24.15 a month, or $6 on CARE and $12 on FERA. Balcony solar reduces volumetric charges only, so roughly $290 a year is untouchable for a non-CARE home no matter how much the panel produces.</li>
+        <li><strong>Full on-site use is the optimistic case.</strong> This model credits every kilowatt-hour at the retail rate, which assumes household demand always meets or exceeds what the panel is producing. In practice a midday surplus in an empty home flows to the grid and earns an export credit well below retail, so real savings land somewhat under these figures.</li>
+        <li><strong>Blended rates hide the time dimension.</strong> Each schedule here uses a single average rate derived from total revenue divided by total sales. On the time-of-use schedules, solar output peaks near midday while the expensive 4 to 9 p.m. window sits after the sun drops, so real savings on E-TOU-C and EL-TOU-C would run below what is shown.</li>
+        <li><strong>Revenue does not simply vanish.</strong> Under California's ratemaking, PG&amp;E's authorized revenue requirement is set in the General Rate Case regardless of sales volume. Balancing accounts true up the difference, which means displaced revenue is recovered later from the remaining customer base rather than lost, an effect at the center of the cost-shift debate.</li>
+        <li><strong>Plug-in solar is not yet straightforward in California.</strong> Unlike Germany, where balcony systems are explicitly permitted, the regulatory path here is still unsettled. Treat adoption figures above a few percent as a policy scenario, not a forecast.</li>
+      </ul>
+    </div>
+
+    <footer>Household counts are PG&amp;E's 2023 recorded figures from Appendix A of its GRC Phase II testimony. Revenue and sales are 2024 test year figures from Table B-1, Appendix B of the errata testimony filed October 29, 2025, combining bundled and DA/CCA service. Blended rates are calculated as total revenue divided by total sales.</footer>
+
+  </main>
+</div>
+</div>
+
+<script>
+(function(){
+  var SCHEDULES = [
+    {id:"E-1",    name:"E-1",       desc:"Standard tiered",     hh:1328890, rev:2442100000, kwh:7301000000},
+    {id:"EL-1",   name:"EL-1",      desc:"Standard, CARE",      hh:663900,  rev:1198300000, kwh:5458000000},
+    {id:"ETOUC",  name:"E-TOU-C",   desc:"Time-of-use",         hh:1976880, rev:3685700000, kwh:12062000000},
+    {id:"ELTOUC", name:"EL-TOU-C",  desc:"Time-of-use, CARE",   hh:487470,  rev:417700000,  kwh:2650000000}
+  ];
+  SCHEDULES.forEach(function(s){ s.rate = s.rev / s.kwh; });
+
+  var TOTAL_HH   = SCHEDULES.reduce(function(a,s){return a+s.hh;},0);
+  var TOTAL_KWH  = SCHEDULES.reduce(function(a,s){return a+s.kwh;},0);
+  var TOTAL_REV  = SCHEDULES.reduce(function(a,s){return a+s.rev;},0);
+
+  var DEFAULTS = {kwh:1.5, adopt:5, cost:800};
+  var ids = ["kwh","adopt","cost"];
+  var el = {};
+  ids.forEach(function(k){ el[k] = document.getElementById(k); el[k+"-v"] = document.getElementById(k+"-v"); });
+
+  function num(n,d){ return n.toLocaleString("en-US",{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+  function money(n){
+    if(n >= 1e9) return "$" + (n/1e9).toFixed(2) + "B";
+    if(n >= 1e6) return "$" + num(n/1e6) + "M";
+    if(n >= 1e3) return "$" + num(n/1e3,1) + "K";
+    return "$" + num(n);
+  }
+  function gwh(n){
+    var g = n/1e6;
+    if(g >= 1000) return num(g) + " GWh";
+    if(g >= 10)   return num(g) + " GWh";
+    return g.toFixed(1) + " GWh";
+  }
+
+  function render(){
+    var kwhDay = parseFloat(el.kwh.value),
+        adopt  = parseFloat(el.adopt.value)/100,
+        cost   = parseFloat(el.cost.value);
+
+    el["kwh-v"].textContent   = kwhDay.toFixed(2).replace(/\.?0+$/,"") + " kWh";
+    el["adopt-v"].textContent = (adopt*100).toFixed(1) + "%";
+    el["cost-v"].textContent  = "$" + num(cost);
+
+    var perUnitYear = kwhDay * 365;
+    var tInstalls=0, tGen=0, tLoss=0, tSaveWeighted=0, rows=[], maxLoss=0;
+
+    SCHEDULES.forEach(function(s){
+      var units    = s.hh * adopt;
+      var gen      = units * perUnitYear;
+      var saveHome = perUnitYear * s.rate;
+      var loss     = gen * s.rate;
+      var payback  = saveHome > 0 ? cost/saveHome : Infinity;
+
+      tInstalls += units; tGen += gen; tLoss += loss; tSaveWeighted += saveHome*units;
+      if(loss > maxLoss) maxLoss = loss;
+
+      rows.push({s:s, units:units, gen:gen, offset:gen/s.kwh*100, saveHome:saveHome, payback:payback, loss:loss});
+    });
+
+    var offsetPct = tGen / TOTAL_KWH * 100;
+    var avgSave   = tInstalls > 0 ? tSaveWeighted/tInstalls : 0;
+    var avgPay    = avgSave > 0 ? cost/avgSave : Infinity;
+
+    document.getElementById("offset").textContent = offsetPct.toFixed(2) + "%";
+    document.getElementById("loadfill").style.width = Math.min(offsetPct,100) + "%";
+    document.getElementById("gen-label").textContent = gwh(tGen) + " generated";
+
+    document.getElementById("installs").textContent = num(tInstalls);
+    document.getElementById("gen").textContent = gwh(tGen);
+    document.getElementById("gen-sub").textContent = num(perUnitYear) + " kWh per unit";
+    document.getElementById("revloss").textContent = money(tLoss);
+    document.getElementById("revloss-sub").textContent = (tLoss/TOTAL_REV*100).toFixed(2) + "% of $7.74B residential";
+    document.getElementById("payback").textContent = isFinite(avgPay) ? avgPay.toFixed(1) + " yrs" : "never";
+    document.getElementById("payback-sub").textContent = isFinite(avgPay)
+      ? "at $" + num(avgSave) + " saved per year" : "no savings at these settings";
+
+    var tb = document.getElementById("tbody");
+    tb.innerHTML = "";
+    rows.forEach(function(r){
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td>' + r.s.name + '<span class="sched-sub">' + r.s.desc + ' &middot; $' + r.s.rate.toFixed(3) + '/kWh</span></td>' +
+        '<td>' + num(r.s.hh) + '</td>' +
+        '<td>' + num(r.units) + '</td>' +
+        '<td>' + gwh(r.gen) + '</td>' +
+        '<td>' + r.offset.toFixed(2) + '%</td>' +
+        '<td>$' + num(r.saveHome) + '</td>' +
+        '<td>' + (isFinite(r.payback) ? r.payback.toFixed(1) + ' yrs' : 'n/a') + '</td>' +
+        '<td>' + money(r.loss) + '</td>' +
+        '<td class="bar-cell"><span class="minibar"><i style="width:' +
+          (maxLoss > 0 ? (r.loss/maxLoss*100) : 0) + '%"></i></span></td>';
+      tb.appendChild(tr);
+    });
+
+    var tot = document.createElement("tr");
+    tot.className = "total";
+    tot.innerHTML =
+      '<td>All four schedules</td>' +
+      '<td>' + num(TOTAL_HH) + '</td>' +
+      '<td>' + num(tInstalls) + '</td>' +
+      '<td>' + gwh(tGen) + '</td>' +
+      '<td>' + offsetPct.toFixed(2) + '%</td>' +
+      '<td>$' + num(avgSave) + '</td>' +
+      '<td>' + (isFinite(avgPay) ? avgPay.toFixed(1) + ' yrs' : 'n/a') + '</td>' +
+      '<td>' + money(tLoss) + '</td>' +
+      '<td></td>';
+    tb.appendChild(tot);
+  }
+
+  ids.forEach(function(k){ el[k].addEventListener("input", render); });
+  document.getElementById("reset").addEventListener("click", function(){
+    ids.forEach(function(k){ el[k].value = DEFAULTS[k]; });
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -37,16 +37,40 @@ window.SITE = {
     { date: "2024", text: "Joined FTI Consulting as Director, ESG and Sustainability Advisory." },
   ],
 
+  // ---------------- Featured research ----------------
+  // Each visual is a standalone page in research/capstone/, embedded with its paragraph.
+  featured: {
+    title: "Plug-in Solar and Who Pays for the Grid",
+    period: "2026, Clean Energy Leadership Institute capstone",
+    intro: [
+      "My CELI capstone asks how California should recover the fixed costs of its electric grid as plug-in balcony solar spreads, without shifting that burden onto the households least able to afford it. The work centers on PG&E and compares four policy options, developing two in depth: a utility lease model that removes the upfront cost barrier for lower-income customers, and an income-graduated fixed charge backed by a privacy-preserving income verification process modeled on the ACA marketplace.",
+      "The three interactive models below build the argument in steps: what one panel does for one household, what widespread adoption does to PG&E's sales and revenue, and how fixed grid costs move onto the customers who remain. Each one is live, so you can adjust the assumptions yourself.",
+    ],
+    tags: ["Rate design", "Energy justice", "Distributed solar", "CPUC policy"],
+    visuals: [
+      {
+        title: "One panel, one household, one sunny day",
+        src: "research/capstone/sunny-day.html",
+        paragraph:
+          "The analysis starts with a single home. On a clear July day, an 800 W south-facing balcony panel covers about 22% of a typical PG&E household's electricity use, and nearly all of its output is used on site. Because output peaks around 1 p.m. and fades before PG&E's 4 to 9 p.m. peak pricing window, the panel saves about $1.48 of the day's $7.05 in energy charges. That timing matters for equity: households that are home during the day capture more of the value, and anything the home cannot use flows to the grid uncredited, since plug-in systems are not enrolled in net billing.",
+      },
+      {
+        title: "Balcony solar across PG&E's residential system",
+        src: "research/capstone/balcony-solar-model.html",
+        paragraph:
+          "Scaling up, this model applies balcony solar across PG&E's four main residential rate schedules, using household counts, sales, and revenue from PG&E's General Rate Case filings. At 5% adoption and 1.5 kWh of daily output per unit, about 223,000 panels would displace roughly 0.44% of residential electricity sales and about $35 million in annual revenue. The schedules also expose an equity gap: CARE customers pay lower rates, so the same panel pays back about twice as fast on a standard schedule as on a CARE one. And under California ratemaking that revenue is not lost; it is recovered later from the remaining customers, which sets up the final model.",
+      },
+      {
+        title: "When fixed grid costs fall on fewer customers",
+        src: "research/capstone/grid-cost-spread.html",
+        paragraph:
+          "About 42% of PG&E's average residential rate pays for electricity itself. The other 58% covers poles and wires, wildfire mitigation, transmission, taxes, insurance, and state programs, all of which cost the same no matter how many customers buy power. If 20% of customers stopped buying from PG&E, the average rate would rise from 40.6\u00a2 to 46.5\u00a2 per kWh, adding about $30 a month to a 500 kWh bill; at 40% it would reach 56.3\u00a2. Higher rates push more customers toward self-generation, which can accelerate the cycle, and the customers left absorbing it are disproportionately those who cannot afford solar. This cost shift is what the capstone's lease model and income-graduated fixed charge are designed to address.",
+      },
+    ],
+  },
+
   // ---------------- Research ----------------
   research: [
-    {
-      title: "Equitable Rate Design for Balcony Solar in California",
-      period: "2026, CELI Fellowship capstone",
-      description:
-        "Examines how California utilities, centered on PG&E, can recover fixed grid costs as plug-in balcony solar spreads without shifting the burden onto lower-income households. Compares four policy options and develops two in depth: a utility lease model that removes the upfront cost barrier while giving the utility visibility into behind-the-meter generation, and an income-graduated fixed charge with a privacy-preserving income verification mechanism modeled on the ACA marketplace.",
-      tags: ["Rate design", "Energy justice", "Distributed solar", "CPUC policy"],
-      links: [],
-    },
     {
       title: "Trailhead Quota Reporting and Demand Forecasting",
       period: "2019 to 2022, Yosemite Conservancy",
