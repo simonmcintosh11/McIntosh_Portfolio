@@ -177,6 +177,8 @@ main { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
 .badge-conference { color: var(--conference); }
 .badge-preprint { color: var(--preprint); }
 .badge-thesis { color: var(--thesis); }
+.badge-report { color: var(--journal); }
+.empty { margin: 0; }
 .badge-other { color: var(--muted); }
 .bibtex {
   background: var(--chip); border-radius: 8px; padding: 0.8rem 1rem; margin: 0.6rem 0 0;
@@ -195,6 +197,7 @@ main { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
 }
 .tl-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
 .tl-item ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+.tl-item li { margin-bottom: 0.35rem; font-size: 0.95rem; }
 .tl-item p { margin: 0.3rem 0 0; font-size: 0.95rem; }
 .plain { list-style: none; padding: 0; margin: 0; }
 .plain li { display: flex; flex-direction: column; padding: 0.45rem 0; border-bottom: 1px solid var(--border); }

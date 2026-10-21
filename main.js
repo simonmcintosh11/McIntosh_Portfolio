@@ -57,9 +57,8 @@
 
   // ---------- Publications ----------
   const pubs = (S.publications || []).slice().sort((a, b) => (b.year || 0) - (a.year || 0));
-  hideIfEmpty("publications", pubs);
 
-  const typeLabels = { journal: "Journal", conference: "Conference", preprint: "Preprint", thesis: "Thesis", other: "Other" };
+  const typeLabels = { journal: "Journal", conference: "Conference", preprint: "Preprint", report: "Report", thesis: "Thesis", other: "Other" };
   const types = [...new Set(pubs.map((p) => p.type || "other"))];
 
   const highlight = (authors) => {
@@ -68,6 +67,10 @@
   };
 
   function renderPubs(filter) {
+    if (!pubs.length) {
+      $("pub-list").innerHTML = `<p class="muted empty">Publications and reports will be listed here.</p>`;
+      return;
+    }
     const shown = filter === "all" ? pubs : pubs.filter((p) => (p.type || "other") === filter);
     const byYear = {};
     shown.forEach((p) => (byYear[p.year || "Undated"] ||= []).push(p));
@@ -126,6 +129,12 @@
   if (S.cvPdf)
     $("cv-download").innerHTML = `<a class="btn primary" href="${esc(S.cvPdf)}" target="_blank" rel="noopener">Download full CV (PDF)</a>`;
 
+  // "Label | text" bullets render the label in bold
+  const bullet = (b) => {
+    const i = b.indexOf(" | ");
+    return i < 0 ? `<li>${esc(b)}</li>` : `<li><strong>${esc(b.slice(0, i))}.</strong> ${esc(b.slice(i + 3))}</li>`;
+  };
+
   hideIfEmpty("experience-block", S.experience);
   $("experience").innerHTML = (S.experience || [])
     .map(
@@ -133,7 +142,8 @@
       <div class="tl-item">
         <div class="tl-head"><strong>${esc(e.role)}</strong><span class="muted small">${esc(e.period)}</span></div>
         <div class="muted">${esc(e.organization)}</div>
-        ${e.bullets && e.bullets.length ? `<ul>${e.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>` : ""}
+        ${e.summary ? `<p>${esc(e.summary)}</p>` : ""}
+        ${e.bullets && e.bullets.length ? `<ul>${e.bullets.map(bullet).join("")}</ul>` : ""}
       </div>`
     )
     .join("");
